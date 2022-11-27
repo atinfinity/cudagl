@@ -1,0 +1,37 @@
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+
+ENV NVIDIA_VISIBLE_DEVICES ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
+# install package
+RUN echo "Acquire::GzipIndexes \"false\"; Acquire::CompressionTypes::Order:: \"gz\";" > /etc/apt/apt.conf.d/docker-gzip-indexes
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        sudo \
+        less \
+        emacs \
+        tmux \
+        bash-completion \
+        command-not-found \
+        software-properties-common \
+        curl \
+        wget \
+        coreutils \
+        build-essential \
+        pkg-config \
+        git \
+        xdg-user-dirs \
+        libgl1-mesa-dev \
+        freeglut3-dev \
+        mesa-utils \
+        vulkan-tools \
+        libvulkan-dev \
+        libglfw3-dev \
+        && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY config/nvidia_icd.json /usr/share/vulkan/icd.d/
+
+ARG XDG_RUNTIME_DIR="/tmp/xdg_runtime_dir"
+RUN mkdir -p ${XDG_RUNTIME_DIR} && chmod 777 ${XDG_RUNTIME_DIR}
